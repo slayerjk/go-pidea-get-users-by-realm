@@ -1,0 +1,11 @@
+# all
+*
+
+# except
+!README.md
+!.gitignore
+!go.mod
+
+# main packages
+!cmd/pidea-get-users-by-realm.go
+
