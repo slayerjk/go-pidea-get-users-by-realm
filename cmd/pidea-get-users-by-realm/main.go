@@ -1,16 +1,15 @@
 package main
 
 import (
+	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"log/slog"
 	"os"
 	"time"
 
-	// change this path for your project
-
 	vafswork "github.com/slayerjk/go-vafswork"
-	// mailing "github.com/slayerjk/go-mailing"
 	// vawebwork "github.com/slayerjk/go-vawebwork"
 )
 
@@ -18,10 +17,12 @@ const (
 	appName = "pi-get-users-by-realm"
 )
 
-// for dep injection
-// type application struct {
-// 	logger *slog.Logger
-// }
+type piData struct {
+	PideaURL         string `json:"pideaUrl"`
+	PideaApiUser     string `json:"pideaApiUser"`
+	PideaRealm       string `json:"pideaRealm"`
+	PideaApiPassword string
+}
 
 func main() {
 	// defining default values
@@ -29,10 +30,10 @@ func main() {
 		workDir         string    = vafswork.GetExePath()
 		logsPathDefault string    = workDir + "/logs" + "_" + appName
 		startTime       time.Time = time.Now()
-		username        string
-		userPassword    string
-		realm           string
+		dataFile        string    = "data.json"
 	)
+
+	var piData piData
 
 	// flags
 	logsDir := flag.String("log-dir", logsPathDefault, "set custom log dir")
@@ -67,8 +68,6 @@ func main() {
 	defer logFile.Close()
 	// set logger
 	logger := slog.New(slog.NewTextHandler(logFile, nil))
-	// test logger
-	// logger.Info("info test-1", slog.Any("val", "key"))
 
 	// starting programm notification
 	logger.Info("Program Started", "app name", appName)
@@ -79,16 +78,41 @@ func main() {
 		fmt.Fprintf(os.Stdout, "failed to rotate logs:\n\t%v", err)
 	}
 
-	// setting application struct with dep injection
-	// app := &application{
-	// 	logger: logger,
-	// }
-
 	// main code here
-	fmt.Scan("Enter your Pidea username: ", &username)
-	fmt.Scan("Enter your Pidea user password: ", &username)
-	fmt.Scan("Enter Pidea Realm to search users in: ", &realm)
-	fmt.Println(username, userPassword, realm)
+
+	// check data.json exists
+	if _, err := os.Stat(dataFile); errors.Is(err, os.ErrNotExist) {
+		logger.Error("Data file doesn't exist, exiting")
+		os.Exit(1)
+	}
+
+	// reading json data
+	dataBytes, err := os.ReadFile(dataFile)
+	if err != nil {
+		logger.Error("Failed to read Data file, exiting", "err", err)
+		os.Exit(1)
+	}
+
+	// check if data.json is valid json
+	if !json.Valid(dataBytes) {
+		logger.Error("Data file is not Valid json file, exiting")
+		os.Exit(1)
+	}
+
+	// writing data file into a struct
+	err = json.Unmarshal(dataBytes, &piData)
+	if err != nil {
+		logger.Error("Failed to Unmarshal data file, exiting")
+		os.Exit(1)
+	}
+
+	// getting API password from user input
+	fmt.Print("Enter Pidea API user Password: ")
+	fmt.Scan(&piData.PideaApiPassword)
+	if err != nil {
+		logger.Error("Failed to get Pidea user password")
+		os.Exit(1)
+	}
 
 	// count & print estimated time
 	logFile.Close()

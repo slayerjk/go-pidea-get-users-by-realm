@@ -7,5 +7,5 @@
 !go.mod
 
 # main packages
-!cmd/pidea-get-users-by-realm.go
+!cmd/pidea-get-users-by-realm/main.go
 
