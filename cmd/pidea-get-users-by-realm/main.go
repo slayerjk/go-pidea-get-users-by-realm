@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -9,8 +10,10 @@ import (
 	"os"
 	"time"
 
+	pidea "github.com/slayerjk/go-pidea-get-users-by-realm/internal/pidea-api-work"
+
 	vafswork "github.com/slayerjk/go-vafswork"
-	// vawebwork "github.com/slayerjk/go-vawebwork"
+	vawebwork "github.com/slayerjk/go-vawebwork"
 )
 
 const (
@@ -22,6 +25,7 @@ type piData struct {
 	PideaApiUser     string `json:"pideaApiUser"`
 	PideaRealm       string `json:"pideaRealm"`
 	PideaApiPassword string
+	PideaApiToken    string
 }
 
 func main() {
@@ -30,10 +34,10 @@ func main() {
 		workDir         string    = vafswork.GetExePath()
 		logsPathDefault string    = workDir + "/logs" + "_" + appName
 		startTime       time.Time = time.Now()
-		dataFile        string    = "data.json"
+		dataFile        string    = workDir + "/data.json"
+		resultsDir      string    = workDir + "/Results"
+		piData          piData
 	)
-
-	var piData piData
 
 	// flags
 	logsDir := flag.String("log-dir", logsPathDefault, "set custom log dir")
@@ -80,29 +84,35 @@ func main() {
 
 	// main code here
 
+	// make results dir
+	err = os.MkdirAll(resultsDir, os.ModePerm)
+	if err != nil {
+		logger.Error("failed to create Results dir")
+	}
+
 	// check data.json exists
 	if _, err := os.Stat(dataFile); errors.Is(err, os.ErrNotExist) {
-		logger.Error("Data file doesn't exist, exiting")
+		logger.Error("data file doesn't exist, exiting")
 		os.Exit(1)
 	}
 
 	// reading json data
 	dataBytes, err := os.ReadFile(dataFile)
 	if err != nil {
-		logger.Error("Failed to read Data file, exiting", "err", err)
+		logger.Error("failed to read Data file, exiting", "err", err)
 		os.Exit(1)
 	}
 
 	// check if data.json is valid json
 	if !json.Valid(dataBytes) {
-		logger.Error("Data file is not Valid json file, exiting")
+		logger.Error("data file is not Valid json file, exiting")
 		os.Exit(1)
 	}
 
 	// writing data file into a struct
 	err = json.Unmarshal(dataBytes, &piData)
 	if err != nil {
-		logger.Error("Failed to Unmarshal data file, exiting")
+		logger.Error("failed to Unmarshal data file, exiting")
 		os.Exit(1)
 	}
 
@@ -110,8 +120,45 @@ func main() {
 	fmt.Print("Enter Pidea API user Password: ")
 	fmt.Scan(&piData.PideaApiPassword)
 	if err != nil {
-		logger.Error("Failed to get Pidea user password")
+		logger.Error("failed to get Pidea user password")
 		os.Exit(1)
+	}
+
+	// create HTTP Client
+	httpClient := vawebwork.NewInsecureClient()
+
+	// getting API token
+	piData.PideaApiToken, err = pidea.GetPideaApiToken(&httpClient, piData.PideaURL, piData.PideaApiUser, piData.PideaApiPassword)
+	if err != nil {
+		logger.Error("failed to get Pidea API Token", "err", err)
+	}
+	// fmt.Println("Token:", piData.PideaApiToken)
+
+	// getting Pidea users by realm
+	usersResult, err := pidea.GetPideaUsersByRealm(&httpClient, piData.PideaURL, piData.PideaRealm, piData.PideaApiToken)
+	if err != nil {
+		logger.Error("failed to get Pidea Users, exiting", "err", err)
+		os.Exit(1)
+	}
+
+	// for _, user := range usersResult {
+	// 	fmt.Println(user)
+	// }
+
+	// making csv result file for users
+	resultFilePath := fmt.Sprintf("%s/result_%s.csv", resultsDir, dateNow)
+
+	resultFile, err := os.Create(resultFilePath)
+	if err != nil {
+		logger.Error("failed to create result CSV file, exiting", "err", err)
+	}
+	defer resultFile.Close()
+
+	csvWriter := csv.NewWriter(resultFile)
+	defer csvWriter.Flush()
+
+	for k, _ := range usersResult {
+		fmt.Println(k)
 	}
 
 	// count & print estimated time

@@ -2,3 +2,5 @@ github.com/slayerjk/go-vafswork v0.0.3 h1:NwDOxw+r1a4qdWyK/xRMGbdlEkzLQi8TY8sbWc
 github.com/slayerjk/go-vafswork v0.0.3/go.mod h1:NFJ2K1JzbpawOZXnNtmBWAVA2Zp5f+MsfO0z/kUopUE=
 github.com/slayerjk/go-vafswork v1.0.0 h1:aZdL/GSP/+qPOk0uCogjlo3jdMjMqc+dMH3L15Jmifw=
 github.com/slayerjk/go-vafswork v1.0.0/go.mod h1:NFJ2K1JzbpawOZXnNtmBWAVA2Zp5f+MsfO0z/kUopUE=
+github.com/slayerjk/go-vawebwork v0.0.1 h1:coHdmiKqPkV6RVimGGVVObTt/lVeHP9n4hQ9sOTadvA=
+github.com/slayerjk/go-vawebwork v0.0.1/go.mod h1:NrkzKq/IMyQEUKnIbOWswifwbv2ciT2Cicb4uZT4jj8=
