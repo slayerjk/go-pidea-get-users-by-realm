@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"log/slog"
 	"os"
+	"reflect"
 	"time"
 
 	pidea "github.com/slayerjk/go-pidea-get-users-by-realm/internal/pidea-api-work"
@@ -130,13 +131,16 @@ func main() {
 	// getting API token
 	piData.PideaApiToken, err = pidea.GetPideaApiToken(&httpClient, piData.PideaURL, piData.PideaApiUser, piData.PideaApiPassword)
 	if err != nil {
+		fmt.Println(err)
 		logger.Error("failed to get Pidea API Token", "err", err)
+		os.Exit(1)
 	}
 	// fmt.Println("Token:", piData.PideaApiToken)
 
 	// getting Pidea users by realm
 	usersResult, err := pidea.GetPideaUsersByRealm(&httpClient, piData.PideaURL, piData.PideaRealm, piData.PideaApiToken)
 	if err != nil {
+		fmt.Println(err)
 		logger.Error("failed to get Pidea Users, exiting", "err", err)
 		os.Exit(1)
 	}
@@ -157,9 +161,35 @@ func main() {
 	csvWriter := csv.NewWriter(resultFile)
 	defer csvWriter.Flush()
 
-	for k, _ := range usersResult {
-		fmt.Println(k)
+	// getting headers for csv from User struct
+	rowToWrite := make([]string, 0)
+	for i, user := range usersResult {
+		rowToWrite = []string{}
+		// form CSV headers
+		if i == 0 {
+			csvHeaders := GetStructKeys(user)
+			if len(csvHeaders) == 0 {
+				fmt.Println("internal error, check logs")
+				logger.Error("empty headers list for result csv, check logic")
+			}
+			if err = csvWriter.Write(csvHeaders); err != nil {
+				fmt.Println("internal error, check logs")
+				logger.Error("failed to write headers to csv")
+			}
+		}
+
+		// get string value of struct fields
+		values := reflect.ValueOf(user)
+		for j := 0; j < values.NumField(); j++ {
+			stringToWrite := fmt.Sprintf("%v", values.Field(j))
+			rowToWrite = append(rowToWrite, stringToWrite)
+		}
+
+		// write user row in result
+		csvWriter.Write(rowToWrite)
 	}
+
+	resultFile.Sync()
 
 	// count & print estimated time
 	logFile.Close()

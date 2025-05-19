@@ -21,8 +21,10 @@ type Users struct {
 	} `json:"result"`
 }
 
+// user struct of Get user Pidea API response.
+// excluded fields are "editable" & "userid" as no valuable info
 type User struct {
-	Editable  bool     `json:"editable"`
+	// Editable  bool     `json:"editable"`
 	Email     string   `json:"email"`
 	Givenname string   `json:"givenname"`
 	MemberOf  []string `json:"memberOf"`
@@ -30,8 +32,8 @@ type User struct {
 	Phone     string   `json:"phone"`
 	Resolver  string   `json:"resolver"`
 	Surname   string   `json:"surname"`
-	Userid    string   `json:"userid"`
-	Username  string   `json:"username"`
+	// Userid    string   `json:"userid"`
+	Username string `json:"username"`
 }
 
 // Get Pidea API Token for given user(POST)
@@ -56,6 +58,9 @@ func GetPideaApiToken(httpClient *http.Client, baseUrl, userName, UserPassword s
 
 	// check status code
 	if response.StatusCode != 200 {
+		if response.StatusCode == 401 {
+			return "", fmt.Errorf("wrong credentials for getToken POST request StatusCode,\n\t%s", response.Status)
+		}
 		return "", fmt.Errorf("check getToken POST request StatusCode,\n\t%s", response.Status)
 	}
 
@@ -101,6 +106,9 @@ func GetPideaUsersByRealm(httpClient *http.Client, baseUrl, realm, apiToken stri
 
 	// check status code
 	if response.StatusCode != 200 {
+		if response.StatusCode == 401 {
+			return nil, fmt.Errorf("auth failure for getUsersByRealm GET request StatusCode,\n\t%s", response.Status)
+		}
 		return nil, fmt.Errorf("check getUsersByRealm GET request StatusCode,\n\t%s", response.Status)
 	}
 
