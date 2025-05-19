@@ -12,6 +12,7 @@ import (
 	"time"
 
 	pidea "github.com/slayerjk/go-pidea-get-users-by-realm/internal/pidea-api-work"
+	"golang.org/x/term"
 
 	vafswork "github.com/slayerjk/go-vafswork"
 	vawebwork "github.com/slayerjk/go-vawebwork"
@@ -118,12 +119,27 @@ func main() {
 	}
 
 	// getting API password from user input
-	fmt.Print("Enter Pidea API user Password: ")
-	fmt.Scan(&piData.PideaApiPassword)
-	if err != nil {
-		logger.Error("failed to get Pidea user password")
-		os.Exit(1)
+	for {
+		fmt.Print("Enter Pidea API user's Password and press Enter: ")
+		passwordBytes, err := term.ReadPassword(int(os.Stdin.Fd()))
+		if err != nil {
+			fmt.Println("error, check logs")
+			logger.Error("failed to get user's password, exiting", "err", err)
+			os.Exit(1)
+		}
+
+		if len(string(passwordBytes)) == 0 {
+			fmt.Println("")
+			fmt.Println("password may not be empty")
+			logger.Error("empty password entered")
+			continue
+		}
+
+		piData.PideaApiPassword = string(passwordBytes)
+		break
 	}
+
+	fmt.Println(piData.PideaApiPassword)
 
 	// create HTTP Client
 	httpClient := vawebwork.NewInsecureClient()
@@ -162,9 +178,8 @@ func main() {
 	defer csvWriter.Flush()
 
 	// getting headers for csv from User struct
-	rowToWrite := make([]string, 0)
 	for i, user := range usersResult {
-		rowToWrite = []string{}
+		rowToWrite := make([]string, 0)
 		// form CSV headers
 		if i == 0 {
 			csvHeaders := GetStructKeys(user)
