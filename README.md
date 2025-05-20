@@ -1,6 +1,8 @@
 # go_pidea-get-users-by-realm
 Go: get PrivacyIdea users via REST API by given realm
 
+For use in Windows mostly(linux not tested)
+
 <h2>Data file(data.json)</h2>
 
 ```
