@@ -5,6 +5,10 @@ For use in Windows mostly(linux not tested)
 
 <h2>Data file(data.json)</h2>
 
+Must be placed in root dir of app.
+
+"data_BLANK.json" is example, edit it and rename to "data.json" to use.
+
 ```
 {
     "pideaUrl": "https://<YOUR PRIVACY IDEA URL>",

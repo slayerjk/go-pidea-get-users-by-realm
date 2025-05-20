@@ -5,7 +5,11 @@
 !README.md
 !.gitignore
 !go.mod
+!data_BLANK.json
 
 # main packages
 !cmd/pidea-get-users-by-realm/main.go
+!cmd/pidea-get-users-by-realm/helpers.go
 
+# internal
+!internal/pidea-api-work/pidea-api-work.go

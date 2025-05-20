@@ -49,7 +49,7 @@ func main() {
 
 	flag.Usage = func() {
 		fmt.Println("Get PrivacyIdea users by Realm")
-		fmt.Println("Version = 0.0.0")
+		fmt.Println("Version = 0.0.1")
 		fmt.Println("Usage: <app> -r <YOUR REALM>")
 		fmt.Println("Flags:")
 		flag.PrintDefaults()
