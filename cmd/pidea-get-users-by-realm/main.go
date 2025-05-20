@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	pidea "github.com/slayerjk/go-pidea-get-users-by-realm/internal/pidea-api-work"
@@ -25,7 +26,7 @@ const (
 type piData struct {
 	PideaURL         string `json:"pideaUrl"`
 	PideaApiUser     string `json:"pideaApiUser"`
-	PideaRealm       string `json:"pideaRealm"`
+	PideaRealm       string
 	PideaApiPassword string
 	PideaApiToken    string
 }
@@ -44,11 +45,12 @@ func main() {
 	// flags
 	logsDir := flag.String("log-dir", logsPathDefault, "set custom log dir")
 	logsToKeep := flag.Int("keep-logs", 7, "set number of logs to keep after rotation")
+	realm := flag.String("realm", "NONE", "Pidea realm to get users from")
 
 	flag.Usage = func() {
 		fmt.Println("Get PrivacyIdea users by Realm")
-		fmt.Println("Version = x.x.x")
-		fmt.Println("Usage: <app> [-opt] ...")
+		fmt.Println("Version = 0.0.0")
+		fmt.Println("Usage: <app> -r <YOUR REALM>")
 		fmt.Println("Flags:")
 		flag.PrintDefaults()
 	}
@@ -85,6 +87,11 @@ func main() {
 	}
 
 	// main code here
+	if strings.ToUpper(*realm) == "NONE" {
+		fmt.Println("realm is not set, use '-r <YOUR REALM>' flag")
+		os.Exit(1)
+	}
+	piData.PideaRealm = *realm
 
 	// make results dir
 	err = os.MkdirAll(resultsDir, os.ModePerm)
@@ -139,8 +146,6 @@ func main() {
 		break
 	}
 
-	fmt.Println(piData.PideaApiPassword)
-
 	// create HTTP Client
 	httpClient := vawebwork.NewInsecureClient()
 
@@ -166,7 +171,7 @@ func main() {
 	// }
 
 	// making csv result file for users
-	resultFilePath := fmt.Sprintf("%s/result_%s.csv", resultsDir, dateNow)
+	resultFilePath := fmt.Sprintf("%s/result_%s_%s.csv", resultsDir, *realm, dateNow)
 
 	resultFile, err := os.Create(resultFilePath)
 	if err != nil {
@@ -205,6 +210,7 @@ func main() {
 	}
 
 	resultFile.Sync()
+	fmt.Printf("\nDONE, result is in: %s", resultFilePath)
 
 	// count & print estimated time
 	logFile.Close()
