@@ -1,3 +1,5 @@
+github.com/slayerjk/go-pideaapi v0.0.0-20250701103325-a2a740a2feb8 h1:MFT/600ioByyiZnRUgFcZVJYeVzyGt5nKj6xBzvO7r8=
+github.com/slayerjk/go-pideaapi v0.0.0-20250701103325-a2a740a2feb8/go.mod h1:CDCEFQAh8h3nPPzLvEGAaaeKz2yS2oxwpQFrEcXrnaQ=
 github.com/slayerjk/go-vafswork v0.0.3 h1:NwDOxw+r1a4qdWyK/xRMGbdlEkzLQi8TY8sbWcIgfPQ=
 github.com/slayerjk/go-vafswork v0.0.3/go.mod h1:NFJ2K1JzbpawOZXnNtmBWAVA2Zp5f+MsfO0z/kUopUE=
 github.com/slayerjk/go-vawebwork v0.0.1 h1:coHdmiKqPkV6RVimGGVVObTt/lVeHP9n4hQ9sOTadvA=

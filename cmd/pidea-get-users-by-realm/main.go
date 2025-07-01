@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	pidea "github.com/slayerjk/go-pidea-get-users-by-realm/internal/pidea-api-work"
+	pidea "github.com/slayerjk/go-pideaapi"
 	"golang.org/x/term"
 
 	vafswork "github.com/slayerjk/go-vafswork"
@@ -150,7 +150,7 @@ func main() {
 	httpClient := vawebwork.NewInsecureClient()
 
 	// getting API token
-	piData.PideaApiToken, err = pidea.GetPideaApiToken(&httpClient, piData.PideaURL, piData.PideaApiUser, piData.PideaApiPassword)
+	piData.PideaApiToken, err = pidea.GetApiToken(&httpClient, piData.PideaURL, piData.PideaApiUser, piData.PideaApiPassword)
 	if err != nil {
 		fmt.Println(err)
 		logger.Error("failed to get Pidea API Token", "err", err)
